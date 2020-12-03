@@ -19,17 +19,28 @@ package com.google.mlkit.codelab.translate
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import com.google.mlkit.codelab.translate.main.MainFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SelectFragment {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, MainFragment.newInstance())
-                .commitNow()
+            onSelectFragment(MainFragment.newInstance(), false)
+        }
+    }
+
+    override fun onSelectFragment(fragment: Fragment, isAddToBackStack: Boolean) {
+        with(supportFragmentManager.beginTransaction()) {
+            replace(R.id.container, fragment)
+            if (!isAddToBackStack) {
+                commitNow()
+            } else {
+                addToBackStack(null)
+                commit()
+            }
         }
     }
 

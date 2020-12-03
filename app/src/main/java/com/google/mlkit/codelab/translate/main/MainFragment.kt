@@ -18,6 +18,8 @@
 package com.google.mlkit.codelab.translate.main
 
 import android.Manifest
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.os.Bundle
@@ -37,10 +39,14 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import com.google.mlkit.codelab.translate.CarNumberFragment
+import com.google.mlkit.codelab.translate.MyDialogFragment
 import com.google.mlkit.codelab.translate.R
+import com.google.mlkit.codelab.translate.SelectFragment
 import com.google.mlkit.codelab.translate.analyzer.TextAnalyzer
 import com.google.mlkit.codelab.translate.util.ScopedExecutor
 import kotlinx.android.synthetic.main.main_fragment.*
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
@@ -52,6 +58,9 @@ class MainFragment : Fragment() {
 
     companion object {
         fun newInstance() = MainFragment()
+
+        const val KEY_SHARE = "KeyShare"
+        const val KEY_SIZE = "KeySize"
 
         // We only need to analyze the part of the image that has text, so we set crop percentages
         // to avoid analyze the entire image from the live camera feed.
@@ -69,6 +78,8 @@ class MainFragment : Fragment() {
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
         private const val TAG = "MainFragment"
     }
+
+    private val listCarNumber = ArrayList<String>()
 
     private var displayId: Int = -1
     private val viewModel: MainViewModel by viewModels()
@@ -98,8 +109,53 @@ class MainFragment : Fragment() {
         scopedExecutor.shutdown()
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val preferencesRestore = context?.getSharedPreferences(KEY_SHARE, Context.MODE_PRIVATE)
+        for (index in 0 until preferencesRestore!!.getInt(KEY_SIZE, 0)) {
+            listCarNumber.add(preferencesRestore.getString(index.toString(), "")!!)
+        }
+    }
+
+    private fun saveNumber() {
+        val sharePrev: SharedPreferences =
+            context?.getSharedPreferences(KEY_SHARE, Context.MODE_PRIVATE)!!
+        val editor = sharePrev.edit()
+        for (index in 0 until listCarNumber.size) {
+            editor.putString(index.toString(), listCarNumber[index])
+        }
+        editor.putInt(KEY_SIZE, listCarNumber.size)
+        editor.apply()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        saveNumber()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        saveNumber()
+    }
+
+    private fun openDialogFragment(carNumber: String) {
+        MyDialogFragment.saveArgumentMyDialogFragment(listCarNumber, carNumber)
+            .show(childFragmentManager, null)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        bt_look.setOnClickListener {
+            (activity as? SelectFragment)?.onSelectFragment(
+                CarNumberFragment.saveArgumentCarNumberFragment(listCarNumber),
+                true
+            )
+        }
+
+        bt_test.setOnClickListener {
+            openDialogFragment("Test")
+        }
 
         container = view as ConstraintLayout
         viewFinder = container.findViewById(R.id.viewfinder)
@@ -193,9 +249,14 @@ class MainFragment : Fragment() {
                             viewModel.sourceText,
                             viewModel.imageCropPercentages
                     )
-                    )
-                }
-        viewModel.sourceText.observe(viewLifecycleOwner, Observer { srcText.text = it })
+                )
+            }
+        viewModel.sourceText.observe(viewLifecycleOwner, Observer { text ->
+            srcText.text = text
+            srcText.setOnClickListener {
+                openDialogFragment(text)
+            }
+        })
         viewModel.imageCropPercentages.observe(viewLifecycleOwner,
                 Observer { drawOverlay(overlay.holder, it.first, it.second) })
 
