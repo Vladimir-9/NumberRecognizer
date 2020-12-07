@@ -95,8 +95,8 @@ class MainFragment : Fragment() {
     private lateinit var scopedExecutor: ScopedExecutor
 
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         return inflater.inflate(R.layout.main_fragment, container, false)
     }
@@ -183,10 +183,10 @@ class MainFragment : Fragment() {
             holder.setFormat(PixelFormat.TRANSPARENT)
             holder.addCallback(object : SurfaceHolder.Callback {
                 override fun surfaceChanged(
-                        holder: SurfaceHolder?,
-                        format: Int,
-                        width: Int,
-                        height: Int
+                    holder: SurfaceHolder?,
+                    format: Int,
+                    width: Int,
+                    height: Int
                 ) {
                 }
 
@@ -194,7 +194,13 @@ class MainFragment : Fragment() {
                 }
 
                 override fun surfaceCreated(holder: SurfaceHolder?) {
-                    holder?.let { drawOverlay(it, DESIRED_HEIGHT_CROP_PERCENT, DESIRED_WIDTH_CROP_PERCENT) }
+                    holder?.let {
+                        drawOverlay(
+                            it,
+                            DESIRED_HEIGHT_CROP_PERCENT,
+                            DESIRED_WIDTH_CROP_PERCENT
+                        )
+                    }
                 }
 
             })
@@ -217,7 +223,7 @@ class MainFragment : Fragment() {
 
     private fun bindCameraUseCases() {
         val cameraProvider = cameraProvider
-                ?: throw IllegalStateException("Camera initialization failed.")
+            ?: throw IllegalStateException("Camera initialization failed.")
 
         // Get screen metrics used to setup camera for full screen resolution
         val metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }
@@ -229,40 +235,45 @@ class MainFragment : Fragment() {
         val rotation = viewFinder.display.rotation
 
         val preview = Preview.Builder()
-                .setTargetAspectRatio(screenAspectRatio)
-                .setTargetRotation(rotation)
-                .build()
+            .setTargetAspectRatio(screenAspectRatio)
+            .setTargetRotation(rotation)
+            .build()
 
         // Build the image analysis use case and instantiate our analyzer
         imageAnalyzer = ImageAnalysis.Builder()
-                // We request aspect ratio but no resolution
-                .setTargetAspectRatio(screenAspectRatio)
-                .setTargetRotation(rotation)
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-                .also {
-                    it.setAnalyzer(
-                            cameraExecutor
-                            , TextAnalyzer(
-                            requireContext(),
-                            lifecycle,
-                            viewModel.sourceText,
-                            viewModel.imageCropPercentages
+            // We request aspect ratio but no resolution
+            .setTargetAspectRatio(screenAspectRatio)
+            .setTargetRotation(rotation)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+            .also {
+                it.setAnalyzer(
+                    cameraExecutor
+                    , TextAnalyzer(
+                        requireContext(),
+                        lifecycle,
+                        viewModel.sourceText,
+                        viewModel.imageCropPercentages
                     )
                 )
             }
         viewModel.sourceText.observe(viewLifecycleOwner, Observer { text ->
             srcText.text = text
-            srcText.setOnClickListener {
-                openDialogFragment(text)
-            }
         })
+        srcText.setOnClickListener {
+            val updateNumber = srcText.text.toString().replaceFirst(
+                "(\\w)[\\s]*(\\d{3})[\\s]*(\\w{2})[\\s]*(\\d{1,3})".toRegex(),
+                "$1$2$3 $4"
+            )
+            val textSplit = updateNumber.toUpperCase(Locale.ROOT).split("\n")
+            openDialogFragment(textSplit[0])
+        }
         viewModel.imageCropPercentages.observe(viewLifecycleOwner,
-                Observer { drawOverlay(overlay.holder, it.first, it.second) })
+            Observer { drawOverlay(overlay.holder, it.first, it.second) })
 
         // Select back camera since text detection does not work with front camera
         val cameraSelector =
-                CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+            CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
 
         try {
             // Unbind use cases before rebinding
@@ -270,7 +281,7 @@ class MainFragment : Fragment() {
 
             // Bind use cases to camera
             camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageAnalyzer
+                this, cameraSelector, preview, imageAnalyzer
             )
             preview.setSurfaceProvider(viewFinder.createSurfaceProvider())
         } catch (exc: IllegalStateException) {
@@ -279,9 +290,9 @@ class MainFragment : Fragment() {
     }
 
     private fun drawOverlay(
-            holder: SurfaceHolder,
-            heightCropPercent: Int,
-            widthCropPercent: Int
+        holder: SurfaceHolder,
+        heightCropPercent: Int,
+        widthCropPercent: Int
     ) {
         val canvas = holder.lockCanvas()
         val bgPaint = Paint().apply {
@@ -308,10 +319,10 @@ class MainFragment : Fragment() {
 
         val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
         canvas.drawRoundRect(
-                rect, cornerRadius, cornerRadius, rectPaint
+            rect, cornerRadius, cornerRadius, rectPaint
         )
         canvas.drawRoundRect(
-                rect, cornerRadius, cornerRadius, outlinePaint
+            rect, cornerRadius, cornerRadius, outlinePaint
         )
         holder.unlockCanvasAndPost(canvas)
     }
@@ -330,7 +341,7 @@ class MainFragment : Fragment() {
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = ln(max(width, height).toDouble() / min(width, height))
         if (abs(previewRatio - ln(RATIO_4_3_VALUE))
-                <= abs(previewRatio - ln(RATIO_16_9_VALUE))
+            <= abs(previewRatio - ln(RATIO_16_9_VALUE))
         ) {
             return AspectRatio.RATIO_4_3
         }
@@ -342,7 +353,7 @@ class MainFragment : Fragment() {
      * been granted? If yes, start Camera. Otherwise display a toast
      */
     override fun onRequestPermissionsResult(
-            requestCode: Int, permissions: Array<String>, grantResults: IntArray
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
@@ -355,9 +366,9 @@ class MainFragment : Fragment() {
                 }
             } else {
                 Toast.makeText(
-                        context,
-                        "Permissions not granted by the user.",
-                        Toast.LENGTH_SHORT
+                    context,
+                    "Permissions not granted by the user.",
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -368,7 +379,7 @@ class MainFragment : Fragment() {
      */
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(
-                requireContext(), it
+            requireContext(), it
         ) == PackageManager.PERMISSION_GRANTED
     }
 }
