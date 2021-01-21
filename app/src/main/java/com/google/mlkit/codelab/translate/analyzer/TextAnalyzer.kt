@@ -114,7 +114,7 @@ class TextAnalyzer(
                     Log.e(TAG, "Text recognition error", exception)
                     val message = getErrorMessage(exception)
                     message?.let {
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                       // Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
                 }
     }

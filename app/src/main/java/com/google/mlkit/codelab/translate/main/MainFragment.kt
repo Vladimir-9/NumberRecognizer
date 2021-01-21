@@ -39,8 +39,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import com.google.mlkit.codelab.translate.CarNumberFragment
-import com.google.mlkit.codelab.translate.MyDialogFragment
+import com.google.mlkit.codelab.translate.fragments.CarNumberFragment
+import com.google.mlkit.codelab.translate.fragments.MyDialogFragment
 import com.google.mlkit.codelab.translate.R
 import com.google.mlkit.codelab.translate.SelectFragment
 import com.google.mlkit.codelab.translate.analyzer.TextAnalyzer
@@ -248,8 +248,7 @@ class MainFragment : Fragment() {
             .build()
             .also {
                 it.setAnalyzer(
-                    cameraExecutor
-                    , TextAnalyzer(
+                    cameraExecutor, TextAnalyzer(
                         requireContext(),
                         lifecycle,
                         viewModel.sourceText,
@@ -265,8 +264,9 @@ class MainFragment : Fragment() {
                 "(\\w)[\\s]*(\\d{3})[\\s]*(\\w{2})[\\s]*(\\d{1,3})".toRegex(),
                 "$1$2$3 $4"
             )
-            val textSplit = updateNumber.toUpperCase(Locale.ROOT).split("\n")
-            openDialogFragment(textSplit[0])
+            val textSplit =
+                updateNumber.toUpperCase(Locale.ROOT).split("\n")
+            openDialogFragment(textSplit[0].replace('Y', 'У', true))
         }
         viewModel.imageCropPercentages.observe(viewLifecycleOwner,
             Observer { drawOverlay(overlay.holder, it.first, it.second) })

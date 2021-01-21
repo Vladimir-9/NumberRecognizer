@@ -15,12 +15,13 @@
  *
  */
 
-package com.google.mlkit.codelab.translate
+package com.google.mlkit.codelab.translate.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import com.google.mlkit.codelab.translate.main.MainFragment
+import com.google.mlkit.codelab.translate.R
+import com.google.mlkit.codelab.translate.SelectFragment
 
 class MainActivity : AppCompatActivity(), SelectFragment {
 

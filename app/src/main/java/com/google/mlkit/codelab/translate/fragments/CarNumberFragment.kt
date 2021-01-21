@@ -1,13 +1,15 @@
-package com.google.mlkit.codelab.translate
+package com.google.mlkit.codelab.translate.fragments
 
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView.OnItemClickListener
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.mlkit.codelab.translate.AdapterNumberCar
+import com.google.mlkit.codelab.translate.R
+import com.google.mlkit.codelab.translate.withArguments
 import java.util.*
 
 class CarNumberFragment : Fragment(R.layout.car_number_fragment) {
@@ -26,7 +28,7 @@ class CarNumberFragment : Fragment(R.layout.car_number_fragment) {
         }
     }
 
-    private lateinit var arrayAdapterNumber: ArrayAdapter<String>
+    private lateinit var arrayAdapterNumber: AdapterNumberCar<String>
     private var listViewPosition = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -39,7 +41,7 @@ class CarNumberFragment : Fragment(R.layout.car_number_fragment) {
             view.findViewById(R.id.listViewNumber)
 
         arrayAdapterNumber =
-            ArrayAdapter(requireContext(), R.layout.list_car_item_single_choice, listCarNumber)
+            AdapterNumberCar (requireContext(), R.layout.list_car_item_single_choice, listCarNumber)
         listViewNumber.adapter = arrayAdapterNumber
 
         listViewNumber.onItemClickListener =

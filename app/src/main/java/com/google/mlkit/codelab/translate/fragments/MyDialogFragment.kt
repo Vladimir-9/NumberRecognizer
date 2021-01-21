@@ -1,15 +1,17 @@
-package com.google.mlkit.codelab.translate
+package com.google.mlkit.codelab.translate.fragments
 
 import android.app.Dialog
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.mlkit.codelab.translate.R
+import com.google.mlkit.codelab.translate.withArguments
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -56,6 +58,10 @@ class MyDialogFragment : DialogFragment() {
             background = materialShapeDrawable
             editText.setText(carNumber)
             setPositiveButton("Сохранить") { _, _ ->
+                with(Toast.makeText(activity, "Сохранено", Toast.LENGTH_SHORT)) {
+                    setGravity(Gravity.CENTER, 0, 200)
+                    show()
+                }
                 itemCarNumber = listCarNumber.size + 1
                 listCarNumber.add(
                     "$itemCarNumber - " + editText.text
